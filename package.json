@@ -1,0 +1,32 @@
+{
+  "name": "otter",
+  "preferGlobal": "true",
+  "version": "0.1.0",
+  "author": "Ben Firshman <ben@firshman.co.uk>",
+  "description": "run your client-side apps on the server",
+  "bin": {
+    "otter": "./bin/http-server"
+  },
+  "scripts": {
+    "test": ""
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bfirsh/otter.git"
+  },
+  "dependencies" : {
+    "coffee-script": "~1.3",
+    "docopt": "~0.1",
+    "express": "~3.0",
+    "http-proxy": "~0.8",
+    "zombie": "~2.0"
+  },
+  "devDependencies": {
+  },
+  "license": "BSD",
+  "engines": {
+    "node": ">=0.6"
+  }
+}
+
