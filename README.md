@@ -28,7 +28,6 @@ Is it secure?
 -------------
 
 
-
 Getting started
 ---------------
 
@@ -40,5 +39,15 @@ The app inside `example/` is a naive example of a Backbone app that uses Otter. 
 
 Point your browser at [http://localhost:8000](http://localhost:8000).
 
+Complex example
+---------------
+
+
+
+Using it as part of an Express app
+----------------------------------
+
+Running the test suite
+----------------------
 
 

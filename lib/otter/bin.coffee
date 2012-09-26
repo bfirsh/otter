@@ -2,7 +2,7 @@ server = require './server'
 docopt = require 'docopt'
 
 doc = """
-Run your client-side apps server-side.
+Otter is an HTTP server that renders your client-side apps with Zombie.js.
 
 Usage: 
   otter [options] <path>
