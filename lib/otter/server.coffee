@@ -21,10 +21,7 @@ exports.createApp = (options) ->
         # (Note: this sucks. We need to modify zombiejs so we can just pass
         # it the source of a page, and what URL it's supposed to be.)
         else
-          renderer.render
-            url: options.baseUrl + req.url
-            success: (browser) ->
-              res.send browser.document.outerHTML
+          renderer.controller(options)(req, res, next)
 
   return app
 

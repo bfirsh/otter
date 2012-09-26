@@ -39,12 +39,11 @@ Point your browser at [http://localhost:8000](http://localhost:8000).
 Complex example
 ---------------
 
-
-
 Using it as part of an Express app
 ----------------------------------
 
 Running the test suite
 ----------------------
 
+    $ npm test
 
