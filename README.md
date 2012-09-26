@@ -31,8 +31,7 @@ Getting started
 
 The app inside `example/` is a simple example of a Backbone app that uses Otter. The first page load runs server-side, then the client instantiates Backbone's router to handle subsequent requests.
 
-    $ sudo npm install otter
-    $ otter example/
+    $ ./bin/otter example/
     Server started on port 8000.
 
 Point your browser at [http://localhost:8000](http://localhost:8000).
