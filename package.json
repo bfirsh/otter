@@ -27,7 +27,9 @@
     "chai": "~1.2",
     "sinon": "~1.4",
     "sinon-chai": "~2.1",
-    "supertest": "~0.3"
+    "supertest": "~0.3",
+    "replay": "~1.5",
+    "request": "~2.11"
   },
   "license": "BSD",
   "engines": {
