@@ -13,6 +13,11 @@ describe 'renderer.controller', ->
     zombieApp = express()
     zombieApp.all '/script.js', (req, res) ->
       res.send "document.title = 'true'"
+    zombieApp.all '/jquery.js', (req, res) ->
+      res.sendfile "#{__dirname}/scripts/jquery-1.8.2.js"
+    zombieApp.all '/true', (req, res) ->
+
+      res.send 'true'
     zombieApp.all '/*', (req, res) ->
       res.send src
     zombieServer = zombieApp.listen 35920, ->
@@ -58,8 +63,25 @@ describe 'renderer.controller', ->
         <body><script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>'
         <script>if (window.jQuery) document.title = 'true'</script></body>
         """
-
       it 'does not load the script', (done) ->
+        supertest(app).get('/').end (err, res) ->
+          expect(res.text).to.contain '<title>false</title>'
+          done()
+
+    context 'when an XMLHttpRequest is made to an external site', ->
+      beforeEach ->
+        src = """
+        <head><title>false</title></head>
+        <body>
+          <script src="/jquery.js"></script>
+          <script>
+            $.get('http://www.example.com/true', function(res) {
+              document.title = res
+            })
+          </script>
+        </body>
+        """
+      it 'does not make the request', (done) ->
         supertest(app).get('/').end (err, res) ->
           expect(res.text).to.contain '<title>false</title>'
           done()
@@ -84,7 +106,6 @@ describe 'renderer.controller', ->
         <body><script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>'
         <script>if (window.jQuery) document.title = 'true'</script></body>
         """
-
       it 'does loads the script', (done) ->
         supertest(app).get('/').end (err, res) ->
           expect(res.text).to.contain '<title>true</title>'

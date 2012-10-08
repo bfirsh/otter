@@ -2,6 +2,8 @@ Browser = require 'zombie'
 URL = require 'url'
 
 patchBrowser = (browser, options = {}) ->
+  # Patch resources to only allow requests to hosts in allowedHosts 
+  # (for scripts, iframes, etc)
   browser.resources._origMakeRequest = browser.resources._makeRequest
   browser.resources._makeRequest = ({ method, url, data, headers, resource, target }, callback) ->
     parsedUrl = URL.parse url
