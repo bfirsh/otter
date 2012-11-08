@@ -131,8 +131,21 @@ describe 'renderer.controller', ->
           expect(res.text).to.contain '<title>false</title>'
           done()
 
-    context 'when window.location is assigned', ->
-      it 'throws an error'
+    context 'when window.location is assigned to an external URL', ->
+      beforeEach ->
+        src = """
+        <head><title>false</title></head>
+        <body>
+          <script>
+            window.location = "http://www.example.com/static"
+          </script>
+        </body>
+        """
+      it 'throws an error', (done) ->
+        supertest(app).get('/').end (err, res) ->
+          expect(res.text).to.not.contain '<title>true</title>'
+          done()
+
 
   context 'when renderer.controller has "code.jquery.com" in allowedHosts', ->
     beforeEach ->
