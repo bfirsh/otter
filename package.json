@@ -1,9 +1,10 @@
 {
   "name": "otter",
-  "preferGlobal": "true",
   "version": "0.1.0",
-  "author": "Ben Firshman <ben@firshman.co.uk>",
   "description": "run your client-side apps on the server",
+  "homepage": "https://github.com/bfirsh/otter",
+  "author": "Ben Firshman <ben@firshman.co.uk>",
+  "preferGlobal": "true",
   "bin": {
     "otter": "./bin/http-server"
   },
