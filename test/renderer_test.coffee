@@ -18,8 +18,15 @@ describe 'renderer.controller', ->
     zombieApp.all '/true', (req, res) ->
 
       res.send 'true'
+    zombieApp.all '/static', (req, res) ->
+      res.send """<!doctype html><html>
+      <head><title>false</title></head>
+      <body>
+        <script>document.title = "true"</script>
+      </body></html>"""
     zombieApp.all '/*', (req, res) ->
       res.send src
+
     zombieServer = zombieApp.listen 35920, ->
       done()
 
@@ -87,10 +94,42 @@ describe 'renderer.controller', ->
           done()
 
     context 'when an iframe points to a local page', ->
-      it 'loads the page'
+      beforeEach ->
+        src = """
+        <head><title>false</title></head>
+        <body>
+          <iframe src="/static"></iframe>
+          <script>
+            var frame = document.getElementsByTagName("iframe")[0];
+            frame.onload = function() {
+              document.title = frame.contentDocument.title;
+            }
+          </script>
+        </body>
+        """
+      it 'loads the page', (done)->
+        supertest(app).get('/').end (err, res) ->
+          expect(res.text).to.contain '<title>true</title>'
+          done()
 
     context 'when an iframe points to an external page', ->
-      it 'does not load the page'
+      beforeEach ->
+        src = """
+        <head><title>false</title></head>
+        <body>
+          <iframe src="http://www.example.com/static"></iframe>
+          <script>
+            var frame = document.getElementsByTagName("iframe")[0];
+            frame.onload = function() {
+              document.title = frame.contentDocument.title;
+            }
+          </script>
+        </body>
+        """
+      it 'does not load the page', (done) ->
+        supertest(app).get('/').end (err, res) ->
+          expect(res.text).to.contain '<title>false</title>'
+          done()
 
     context 'when window.location is assigned', ->
       it 'throws an error'

@@ -1,0 +1,11 @@
+GET /static
+host: www.example.com
+
+200 HTTP/1.1
+content-type: text/plain; charset=utf-8
+
+<head><title>false</title></head>
+<body>
+<script>document.title = "true"</script>
+</body></html>
+
