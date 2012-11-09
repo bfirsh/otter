@@ -23,10 +23,15 @@ If the client's running JavaScript, they can start up the client-side router and
 
 Nope! You don't have to modify your server.
 
-The app running inside Otter talks to the same thing your client-side app does. If you've got a Backbone app for example, it talks to the server which serves JSON for your models.
+The app running inside Otter talks to the same thing your client-side app does. If you've got a Backbone app, it talks to the same server which serves JSON for your models.
 
 ### Is it secure?
 
+Otter is far more paranoid than a browser so you don't trip up on the usual client-side vulnerabilities. 
+
+All code runs inside a sandbox. Node's sandboxes are not perfect, though - you must still make sure you always run trusted code.
+
+To help with that, Otter will only allow HTTP requests to made to the local server by default. If you wish to load data from other domains, you must explicitly allow them.
 
 Getting started
 ---------------
