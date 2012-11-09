@@ -1,19 +1,21 @@
 Otter
 =====
 
-Otter is an HTTP server that renders your client-side apps with Zombie.js.
+Otter is an HTTP server that renders your client-side apps.
 
 Wait, what?
 -----------
 
-When you write a single-page web application with pushState, the server normally serves a blank HTML document and the client fills it with content. This sucks for two reasons:
+When you write a single page application with the HTML5 history API (e.g., using Backbone), you probably end up with a blank index.html file which the client then fills with content. This sucks for two reasons:
 
- - It's slow. The client has to make two requests to display anything on the page.
- - It doesn't work with search engines, browsers with JavaScript disabled, curl, etc etc. They just see a blank page.
+ - It's slow. You have to make at least two round trips to the server to see anything.
+ - It's invisible to search engines, curl, browsers with JavaScript disabled, etc.
 
-If you want to get the server to display content and use client-side routing, you probably have to write everything twice: once for the server, once for the client.
+There's already a solution for this problem. You can write a server that renders what the client renders. This is great, except that now you're writing everything twice.
 
-But what if we could run the client-side code on the server? When a client makes a request to Otter, it loads up your app inside Zombie.js, a headless browser. Once all the Ajax requests and so on have finished, it sends the page as rendered by your app back to the client. 
+But what if we could run the client-side code on the server? What if we could manipulate the page with the DOM API and make HTTP requests with XMLHTTPRequest?
+
+Otter does just that. When a client makes a request to Otter, it loads up your app inside Zombie.js, an efficient headless browser. Once the page finishes loading, it renders the DOM to a string and sends it back to the client.
 
 If the client's running JavaScript, they can start up the client-side router and it's business as usual. If the client hasn't got JavaScript, they just see content like a normal web page.
 
