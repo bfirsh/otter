@@ -1,39 +1,29 @@
 Browser = require 'zombie'
+fs = require 'fs'
+path = require 'path'
 URL = require 'url'
 
-patchBrowser = (browser, options = {}) ->
-  # Patch resources to only allow requests to hosts in allowedHosts 
-  # (for scripts, iframes, etc)
-  browser.resources._origMakeRequest = browser.resources._makeRequest
-  browser.resources._makeRequest = ({ method, url, data, headers, resource, target }, callback) ->
-    parsedUrl = URL.parse url
-
+createBrowser = (options = {}) ->
+  browser = new Browser
+    headers:
+      "X-Otter-No-Render": "true"
+  browser.resources.addHandler (request, next) ->
     if not options.allowedHosts
       options.allowedHosts = []
-
     # Always allow local requests 
     options.allowedHosts.push(URL.parse(options.baseUrl).host)
 
+    parsedUrl = URL.parse(request.url)
     if parsedUrl.host not in options.allowedHosts
-      callback new Error("Not loading #{parsedUrl.href}: #{parsedUrl.host} not in allowedHosts")
+      next(new Error("Not loading #{parsedUrl.href}: #{parsedUrl.host} not in allowedHosts"))
     else
-      @_origMakeRequest 
-        method: method, 
-        url: url, 
-        data: data, 
-        headers: headers, 
-        resource: resource, 
-        target: target
-      , callback
-    
+      next()
+
+  return browser
 
 exports.controller = (options) ->
   (req, res, next) ->
-    browser = new Browser
-      loadCSS: false
-      headers:
-        "X-Otter-No-Render": "true"
-    patchBrowser(browser, options)
+    browser = createBrowser(options)
     browser.visit options.baseUrl + req.url, (err, browser) ->
       if err
         console.log err
