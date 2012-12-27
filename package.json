@@ -6,7 +6,7 @@
   "author": "Ben Firshman <ben@firshman.co.uk>",
   "preferGlobal": "true",
   "bin": {
-    "otter": "./bin/http-server"
+    "otter": "./bin/otter"
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha"
