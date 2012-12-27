@@ -8,14 +8,17 @@ createBrowser = (options = {}) ->
     headers:
       "X-Otter-No-Render": "true"
   browser.resources.addHandler (request, next) ->
-    if not options.allowedHosts
-      options.allowedHosts = []
+    allowedHosts = []
+    if options.allowedHosts
+      allowedHosts = allowedHosts.concat(options.allowedHosts)
     # Always allow local requests 
-    options.allowedHosts.push(URL.parse(options.baseUrl).host)
+    allowedHosts.push(URL.parse(options.baseUrl).host)
 
     parsedUrl = URL.parse(request.url)
-    if parsedUrl.host not in options.allowedHosts
-      next(new Error("Not loading #{parsedUrl.href}: #{parsedUrl.host} not in allowedHosts"))
+    if parsedUrl.host not in allowedHosts
+      err = new Error("Not loading #{parsedUrl.href}: #{parsedUrl.host} not in allowedHosts")
+      console.error(err)
+      next(err)
     else
       next()
 
@@ -30,5 +33,6 @@ exports.controller = (options) ->
       if browser.error
         console.log browser.errors
       res.send browser.document.outerHTML
+      browser.destroy()
 
 
