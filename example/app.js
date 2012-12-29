@@ -1,4 +1,31 @@
-var User = Backbone.Model.extend({
+
+// A model which caches results from server to client
+var OtterModel = Backbone.Model.extend({
+    sync: function(method, model, options) {
+        if (method == 'read') {
+            var url = _.result(model, 'url')
+            if (window.otter.isServer) {
+                var success = options.success;
+                options.success = function(resp) {
+                    if (!window.otter.cache.models) window.otter.cache.models = {};
+                    window.otter.cache.models[url] = resp
+                    if (success) success.apply(this, arguments);
+                };
+            }
+            else {
+                if (window.otter.cache.models && window.otter.cache.models[url] && options.success) {
+                    options.success(window.otter.cache.models[url]);
+                    deferred = jQuery.Deferred();
+                    deferred.resolve();
+                    return deferred.promise();
+                }
+            }
+        }
+        return Backbone.sync(method, model, options);
+    }
+});
+
+var User = OtterModel.extend({
     url: function() {
         return 'http://api.twitter.com/1/users/show/'+this.id+'.json?callback=?'
     },
@@ -49,12 +76,7 @@ var Router = Backbone.Router.extend({
 
 $(function() {
     var router = new Router();
-    var options = {pushState: true}
-    // Already rendered server-side, don't render first route
-    if ($('.content').children().length) {
-        options['silent'] = true;
-    }
-    Backbone.history.start(options);
+    Backbone.history.start({pushState: true});
 
     $(document).on('click', 'a', function(e) {
         router.navigate($(this).attr('href'), true);

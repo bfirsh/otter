@@ -51,6 +51,25 @@ describe 'renderer.controller', ->
             expect(res.text).to.contain '<body>hello</body>'
             done()
 
+      it 'adds window.otter to the document', (done) ->
+        supertest(app)
+          .get('/')
+          .expect(200)
+          .end (err, res) ->
+            expect(res.text).to.contain 'window.otter='
+            done()
+
+    it 'escapes a closing script tag in window.otter', (done) ->
+      src = """
+      <body><script>window.otter.cache.test = "<"+"/script>"</script></body>
+      """
+      supertest(app)
+        .get('/')
+        .expect(200)
+        .end (err, res) ->
+          expect(res.text).to.contain '"test":"<\\/script>"'
+          done()
+
     context 'when a <script> tag points to a local script', ->
       beforeEach ->
         src = """
@@ -162,5 +181,7 @@ describe 'renderer.controller', ->
         supertest(app).get('/').end (err, res) ->
           expect(res.text).to.contain '<title>true</title>'
           done()
+
+
 
 
