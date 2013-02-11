@@ -22,7 +22,7 @@ exports.run = ->
   server.start 
     port: options['-p']
     path: options['<path>']
-    allowedHosts: options['-a']?.split(',')
+    allowedHosts: options['-a'].split(',') if options['-a']
   console.log "Server started on port #{options['-p']}."
 
 
