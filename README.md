@@ -35,6 +35,13 @@ Otter is far more paranoid than a browser so you don't trip up on the usual clie
 
 All code runs inside a sandbox. Node's sandboxes are not perfect, though - you must still make sure you always run trusted code. To help with that, Otter will only allow HTTP requests to made to the local server by default. If you wish to load data from other domains, you must explicitly allow them.
 
+Install
+-------
+
+    $ sudo npm install -g otter
+
+(Or your preferred way of installing npm packages.)
+
 Getting started
 ---------------
 
