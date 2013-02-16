@@ -5,6 +5,8 @@ renderer = require './renderer'
 
 exports.createApp = (options) ->
   app = express()
+  if options.logging
+    app.use express.logger()
 
   app.get '/*', (req, res, next) ->
     fullPath = path.join(options.path, req.url)
