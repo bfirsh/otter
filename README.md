@@ -1,7 +1,7 @@
 Otter
 =====
 
-Otter runs your client-side apps server-side.
+A server that runs your client-side apps.
 
 Wait, what?
 -----------
@@ -31,7 +31,7 @@ Nope! Unlike other techniques which allow you to run the same code server- and c
 
 ### Is it secure?
 
-Otter is far more paranoid than a browser so you don't trip up on the usual client-side vulnerabilities. 
+Otter is far more paranoid than a browser so you don't trip up on common client-side vulnerabilities. 
 
 All code runs inside a sandbox. Node's sandboxes are not perfect, though - you must still make sure you always run trusted code. To help with that, Otter will only allow HTTP requests to made to the local server by default. If you wish to load data from other domains, you must explicitly allow them.
 
@@ -45,18 +45,48 @@ Install
 Getting started
 ---------------
 
-The app inside `example/` is a simple example of a Backbone app that uses Otter. The first page load runs server-side, then the client instantiates Backbone's router to handle subsequent requests.
+Otter is, at a basic level, an HTTP server. Pointed at a directory, it will serve the files inside it. It starts doing clever things, however, when it is asked to serve a file that *doesn't exist*.
+
+When asked to serve a file that doesn't exist in the directory it is pointed at, it will load `index.html` and open that up in Zombie.js. When Zombie.js has finished running the page (all Ajax requests have finished, etc), it will send `document.outerHTML` as the HTTP response.
+
+The app inside `example/` is a simple Twitter client written in Backbone. The first page load runs server-side, then the client instantiates Backbone's router to handle subsequent requests. It uses [backbone-otter](https://github.com/bfirsh/backbone-otter) to handle caching between server and client.
+
+Run Otter on that directory, allowing requests to `api.twitter.com`:
 
     $ ./bin/otter -a api.twitter.com example/
     Server started on port 8000.
 
 Point your browser at [http://localhost:8000](http://localhost:8000).
 
-Complex example
+Resuming your app on the client
+-------------------------------
+
+When the server generates your app's HTML and sends it to the client, the client then needs to reload the application so it can handle user interation and route future pages.
+
+The brute-force approach is to just reroute the URL, completely rebuilding the page client-side. This isn't as scary as it sounds if you cache all the data fetched on page load, but the downsides of this are its obvious ineffciency and perhaps some odd side-effects of loading a new copy of the DOM in if the user has already interacted with the initial DOM.
+
+We can be smarter, though. We can cache the data fetched server-side and pass it to the client. If we then rebuild a set of models and views attached to the correct DOM elements that the server has generated, we can then efficiently "boot up" the application again. In Backbone, this would be a matter of only rendering a view if it hasn't already been populated by the server.
+
+I am working on some [Backbone tools for Otter](https://github.com/bfirsh/backbone-otter) to make this process easier.
+
+API
+---
+
+Otter provides an API to use inside your apps, exposed as `window.otter` on both the server and the client.
+
+### `window.otter.isServer`
+
+`true` or `false`, whether or not the page is running on the server or client.
+
+### `window.otter.cache`
+
+An object that can be used to pass data from the server to the client. You can set values in this object on the server, then when Otter has finished rendering a page, it serialises it to JSON and passes it to the client. It is injected into the top of the page so it is also available as `window.otter.cache`.
+
+Extending Otter
 ---------------
 
-Using it as part of an Express app
-----------------------------------
+Instead of running Otter standalone, it can also be extended by using it as part of a Node.js app. See `lib/otter/server.coffee` for the Express app that is used internally. The renderer is available as `require('otter').renderer`.
+
 
 Running the test suite
 ----------------------
