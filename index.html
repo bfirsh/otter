@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Otter by bfirsh</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>Otter</h1>
+        <p>A server that runs your client-side apps</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/bfirsh/otter" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/bfirsh/otter/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/bfirsh/otter/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <h1>Otter</h1>
+
+<p>Otter runs your client-side apps server-side.</p>
+
+<h2>Wait, what?</h2>
+
+<p>Web apps are shifting client-side. More and more logic is moving from the server to the client, but this often ends up with your server being just a JSON API and a blank index.html which gets filled with content client-side. This sucks for two reasons:</p>
+
+<ul>
+<li>It's slow. You have to make at least two round trips to the server before any content is displayed.</li>
+<li>It's invisible to search engines, curl, browsers with JavaScript disabled, etc.</li>
+</ul><p>The typically solution to this problem is to extend your server so it renders some of what the client-side code would render. This works, but now you're writing everything twice.</p>
+
+<p>But what if we could use client-side APIs on the server? What if we could generate pages with the DOM instead of templates? And make HTTP requests with XMLHTTPRequest? This would mean we could run client-side code on the server without modification.</p>
+
+<p>Otter does just that. When a client makes a request to Otter, it loads up your app inside Zombie.js, a Node implementation of the browser APIs. Once the page finishes loading, it renders the DOM to a string and sends it back to the client.</p>
+
+<p>If the client supports JavaScript, they can start up the client-side router and it's business as usual. If the client can't run JavaScript, they just see the content like a normal web page.</p>
+
+<h3>So I have to write my server in JavaScript?</h3>
+
+<p>Nope! You don't have to modify your server.</p>
+
+<p>Otter's a standalone server. The app running inside Otter talks to the same thing your client-side app does. If you've got a Backbone app, it talks to the same server which serves JSON for your models.</p>
+
+<h3>So I have to write my client-side code with Backbone?</h3>
+
+<p>Nope! Unlike other techniques which allow you to run the same code server- and client-side, Otter is <em>framework agnostic</em>. It is an implementation of the browser APIs on the server, so almost any code which runs inside the browser will run inside Otter.</p>
+
+<h3>Is it secure?</h3>
+
+<p>Otter is far more paranoid than a browser so you don't trip up on the usual client-side vulnerabilities. </p>
+
+<p>All code runs inside a sandbox. Node's sandboxes are not perfect, though - you must still make sure you always run trusted code. To help with that, Otter will only allow HTTP requests to made to the local server by default. If you wish to load data from other domains, you must explicitly allow them.</p>
+
+<h2>Getting started</h2>
+
+<p>The app inside <code>example/</code> is a simple example of a Backbone app that uses Otter. The first page load runs server-side, then the client instantiates Backbone's router to handle subsequent requests.</p>
+
+<pre><code>$ ./bin/otter -a api.twitter.com example/
+Server started on port 8000.
+</code></pre>
+
+<p>Point your browser at <a href="http://localhost:8000">http://localhost:8000</a>.</p>
+
+<h2>Complex example</h2>
+
+<h2>Using it as part of an Express app</h2>
+
+<h2>Running the test suite</h2>
+
+<pre><code>$ npm test
+</code></pre>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/bfirsh">bfirsh</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
