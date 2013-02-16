@@ -25,6 +25,10 @@ Nope! You don't have to modify your server.
 
 Otter's a standalone server. The app running inside Otter talks to the same thing your client-side app does. If you've got a Backbone app, it talks to the same server which serves JSON for your models.
 
+### So I have to write my client-side code with Backbone?
+
+Nope! Unlike other techniques which allow you to run the same code server- and client-side, Otter is *framework agnostic*. It is an implementation of the browser APIs on the server, so almost any code which runs inside the browser will run inside Otter.
+
 ### Is it secure?
 
 Otter is far more paranoid than a browser so you don't trip up on the usual client-side vulnerabilities. 
