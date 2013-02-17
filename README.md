@@ -73,17 +73,6 @@ A comma-separated list of hosts to allow connections to (e.g. `api.example.com,a
 
 The port to listen on. Default: 8000
 
-Resuming your app on the client
--------------------------------
-
-A tricky problem is reinstantiating the app on the client after the app has been run on the server so it can handle user interaction and route future pages. Otter is framework agnostic, so it doesn't prescribe a solution. Though it does provide tools, such as `window.otter.cache` (see *API* below) and [backbone-otter](http://github.com/bfirsh/backbone-otter) if you're using Backbone.
-
-The brute-force solution is to just reroute the URL, completely rebuilding the page client-side. This isn't as scary as it sounds if you cache the data that was fetched on the server, but the downsides of this are its obvious inefficiency and perhaps some odd side-effects of loading a new copy of the DOM in if the user has already interacted with the initial DOM.
-
-We can be smarter, though. We can cache the data fetched server-side and pass it to the client. If we then rebuild a set of models and views attached to the correct DOM elements that the server has generated, we can then efficiently "boot up" the application again. In Backbone, this would be a matter of only rendering a view if it hasn't already been populated by the server.
-
-I am working on some [Backbone tools for Otter](https://github.com/bfirsh/backbone-otter) to make this process easier.
-
 API
 ---
 
@@ -96,6 +85,18 @@ Otter provides an API to use inside your apps, exposed as `window.otter` on both
 ### `window.otter.cache`
 
 An object that can be used to pass data from the server to the client. You can set values in this object on the server, then when Otter has finished rendering a page, it serialises it to JSON and passes it to the client. It is injected into the top of the page so it is also available as `window.otter.cache`.
+
+
+Resuming your app on the client
+-------------------------------
+
+A tricky problem is reinstantiating the app on the client after the app has been run on the server so it can handle user interaction and route future pages. Otter is framework agnostic, so it doesn't prescribe a solution. Though it does provide tools, such as `window.otter.cache` (see *API* below) and [backbone-otter](http://github.com/bfirsh/backbone-otter) if you're using Backbone.
+
+The brute-force solution is to just reroute the URL, completely rebuilding the page client-side. This isn't as scary as it sounds if you cache the data that was fetched on the server, but the downsides of this are its obvious inefficiency and perhaps some odd side-effects of loading a new copy of the DOM in if the user has already interacted with the initial DOM.
+
+We can be smarter, though. We can cache the data fetched server-side and pass it to the client. If we then rebuild a set of models and views attached to the correct DOM elements that the server has generated, we can then efficiently "boot up" the application again. In Backbone, this would be a matter of only rendering a view if it hasn't already been populated by the server.
+
+I am working on some [Backbone tools for Otter](https://github.com/bfirsh/backbone-otter) to make this process easier.
 
 Extending Otter
 ---------------
