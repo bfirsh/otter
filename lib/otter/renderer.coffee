@@ -4,7 +4,7 @@ path = require 'path'
 URL = require 'url'
 
 exports.createBrowser = (options = {}) ->
-  browser = new Browser
+  browser = new OtterBrowser
     headers:
       "X-Otter-No-Render": "true"
   browser.on 'opened', (window) ->
