@@ -1,4 +1,4 @@
-Browser = require 'zombie'
+OtterBrowser = require './browser'
 fs = require 'fs'
 path = require 'path'
 URL = require 'url'
@@ -52,6 +52,7 @@ insertWindowOtter = (window) ->
 exports.controller = (options) ->
   (req, res, next) ->
     browser = exports.createBrowser(options)
+    
     browser.visit options.baseUrl + req.url, (err, browser) ->
       if err
         console.log err
