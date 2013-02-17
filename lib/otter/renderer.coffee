@@ -21,7 +21,7 @@ exports.createBrowser = (options = {}) ->
     parsedUrl = URL.parse(request.url)
     if parsedUrl.host not in allowedHosts
       err = new Error("Not loading #{parsedUrl.href}: #{parsedUrl.host} not in allowedHosts")
-      console.error(err)
+      browser.emit "error", err
       next(err)
     else
       next()
@@ -32,10 +32,6 @@ exports.controller = (options) ->
   (req, res, next) ->
     browser = exports.createBrowser(options)
     browser.visit options.baseUrl + req.url, (err, browser) ->
-      if err
-        console.log err
-      if browser.error
-        console.log browser.errors
       browser.injectWindowOtter()
       res.send browser.document.outerHTML
       browser.destroy()
