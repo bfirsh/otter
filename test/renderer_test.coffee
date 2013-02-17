@@ -85,14 +85,14 @@ describe 'renderer.controller', ->
     context 'when a <script> points to an external script', ->
       beforeEach ->
         src = """
-        <head><title>false</title></head>
         <body><script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>'
         <script>if (window.jQuery) document.title = 'true'</script></body>
         """
       it 'does not load the script', (done) ->
-        supertest(app).get('/').end (err, res) ->
-          expect(res.text).to.contain '<title>false</title>'
-          done()
+        supertest(app)
+          .get('/')
+          .expect(500)
+          .end (err, res) -> done(err)
 
     context 'when an XMLHttpRequest is made to an external site', ->
       beforeEach ->
@@ -134,21 +134,18 @@ describe 'renderer.controller', ->
     context 'when an iframe points to an external page', ->
       beforeEach ->
         src = """
-        <head><title>false</title></head>
         <body>
           <iframe src="http://www.example.com/static"></iframe>
           <script>
             var frame = document.getElementsByTagName("iframe")[0];
-            frame.onload = function() {
-              document.title = frame.contentDocument.title;
-            }
           </script>
         </body>
         """
       it 'does not load the page', (done) ->
-        supertest(app).get('/').end (err, res) ->
-          expect(res.text).to.contain '<title>false</title>'
-          done()
+        supertest(app)
+          .get('/')
+          .expect(500)
+          .end (err, res) -> done(err)
 
     it 'generates a redirect when window.location is assigned to an external URL', (done) ->
       src = """
@@ -176,6 +173,12 @@ describe 'renderer.controller', ->
         expect(res.headers['location']).to.equal '/internal'
         done()
 
+    it 'responds with a 500 if there is an error in the page', (done) ->
+      src = """<body><script>ERRORRR</script></body>"""
+      supertest(app)
+        .get('/')
+        .expect(500)
+        .end (err, res) -> done(err)
 
   context 'when renderer.controller has "code.jquery.com" in allowedHosts', ->
     beforeEach ->

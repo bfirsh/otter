@@ -10,6 +10,10 @@ exports.controller = (options) ->
       res.redirect(url)
       browser.destroy()
     browser.visit req.url, (err, browser) ->
+      # If there are errors, we have to assume the page has been half-rendered, so just 
+      # pass through as a failure
+      return next(err) if err
+
       browser.injectWindowOtter()
       res.send browser.document.outerHTML
       browser.destroy()

@@ -23,7 +23,13 @@ exports.createApp = (options) ->
         # (Note: this sucks. We need to modify zombiejs so we can just pass
         # it the source of a page, and what URL it's supposed to be.)
         else
-          renderer.controller(options)(req, res, next)
+          renderer.controller(options) req, res, (err) =>
+            # If there was an error rendering, we must assume the page was 
+            # half-rendered, so let the client render it instead.
+            if err
+              res.sendfile path.join(options.path, 'index.html')
+            else
+              next()
 
   return app
 
