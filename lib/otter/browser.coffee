@@ -33,6 +33,7 @@ module.exports = class OtterBrowser extends Browser
       # point we should patch Zombie to make this better.
       if @tabs.length != 0
         href = window.location.href
+        # Strip @site from start of href
         if @site and href.substring(0, @site.length) == @site
           href = href.substring(@site.length)
         @emit "navigate", href
