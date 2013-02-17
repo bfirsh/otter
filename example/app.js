@@ -1,11 +1,15 @@
 
 var User = BackboneOtter.Model.extend({
     url: function() {
-        return 'http://api.twitter.com/1/users/show/'+this.id+'.json?callback=?'
+        return 'http://api.twitter.com/1/users/show/'+this.id+'.json?callback=?';
     },
 });
 
 var BaseView = Backbone.View.extend({
+    hasRendered: function() {
+        return this.$el.children().length > 0;
+    },
+
     render: function() {
         this.$el.html(this.template(this.templateData()));
         return this;
@@ -21,7 +25,7 @@ var IndexView = BaseView.extend({
 });
 
 var UserView = BaseView.extend({
-    template: _.template("<h1><%= name %></h1><p><%= description %></p><p><%= location %></p>"),
+    template: _.template("<% if (name) { %><h1><%= name %></h1><p><%= description %></p><p><%= location %></p><% } else { %><p>Loading...</p> <% } %>"),
 
     initialize: function() {
         this.model.on('change', this.render, this);
@@ -40,14 +44,17 @@ var Router = Backbone.Router.extend({
 
     index: function() {
         var view = new IndexView({el: $('.content')});
-        view.render();
+        // Render this view if server has filled content.
+        if (this.previousView || !view.hasRendered()) view.render();
+        this.previousView = view;
     },
 
     user: function(id) {
         var user = new User({id: id});
-        var view = new UserView({el: $('.content'), model: user});
         user.fetch();
-        view.render();
+        var view = new UserView({el: $('.content'), model: user});
+        if (this.previousView || !view.hasRendered()) view.render();
+        this.previousView = view;
     }
 });
 
