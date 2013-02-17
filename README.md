@@ -58,6 +58,21 @@ Run Otter on that directory, allowing requests to `api.twitter.com`:
 
 Point your browser at [http://localhost:8000](http://localhost:8000).
 
+Usage
+-----
+
+    $ otter [options] <path>
+
+Otter is passed a path to a directory which is expected to contain an `index.html` file. It takes these options:
+
+#### -a `host1,host2`
+
+A comma-separated list of hosts to allow connections to (e.g. `api.example.com,api.twitter.com`). By default, Otter will not allow connections to be made to any host except itself. If you want to allow Ajax connections to your API, for example, you will need to add it to this list.
+
+#### -p `port`
+
+The port to listen on. Default: 8000
+
 Resuming your app on the client
 -------------------------------
 
