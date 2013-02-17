@@ -70,82 +70,71 @@ describe 'renderer.controller', ->
           expect(res.text).to.contain '"test":"<\\/script>"'
           done()
 
-    context 'when a <script> tag points to a local script', ->
-      beforeEach ->
-        src = """
-        <head><title>false</title></head>
-        <body><script src="/script.js"></script></body>
-        """
+    it 'loads the script when a <script> tag points to a local script', (done) ->
+      src = """
+      <head><title>false</title></head>
+      <body><script src="/script.js"></script></body>
+      """
+      supertest(app).get('/').end (err, res) ->
+        expect(res.text).to.contain '<title>true</title>'
+        done()
 
-      it 'loads the script', (done) ->
-        supertest(app).get('/').end (err, res) ->
-          expect(res.text).to.contain '<title>true</title>'
-          done()
+    it 'does not load the script when a <script> points to an external script', (done) ->
+      src = """
+      <body><script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>'
+      <script>if (window.jQuery) document.title = 'true'</script></body>
+      """
+      supertest(app)
+        .get('/')
+        .expect(500)
+        .end (err, res) -> done(err)
 
-    context 'when a <script> points to an external script', ->
-      beforeEach ->
-        src = """
-        <body><script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>'
-        <script>if (window.jQuery) document.title = 'true'</script></body>
-        """
-      it 'does not load the script', (done) ->
-        supertest(app)
-          .get('/')
-          .expect(500)
-          .end (err, res) -> done(err)
+    it 'does not make a request when an XMLHttpRequest is made to an external site', (done) ->
+      src = """
+      <head><title>false</title></head>
+      <body>
+        <script src="/jquery.js"></script>
+        <script>
+          $.get('http://www.example.com/true', function(res) {
+            document.title = res
+          })
+        </script>
+      </body>
+      """
+      supertest(app).get('/').end (err, res) ->
+        expect(res.text).to.contain '<title>false</title>'
+        done()
 
-    context 'when an XMLHttpRequest is made to an external site', ->
-      beforeEach ->
-        src = """
-        <head><title>false</title></head>
-        <body>
-          <script src="/jquery.js"></script>
-          <script>
-            $.get('http://www.example.com/true', function(res) {
-              document.title = res
-            })
-          </script>
-        </body>
-        """
-      it 'does not make the request', (done) ->
-        supertest(app).get('/').end (err, res) ->
-          expect(res.text).to.contain '<title>false</title>'
-          done()
+    it 'loads the page when an iframe points to a local page', (done) ->
+      src = """
+      <head><title>false</title></head>
+      <body>
+        <iframe src="/static"></iframe>
+        <script>
+          var frame = document.getElementsByTagName("iframe")[0];
+          frame.onload = function() {
+            document.title = frame.contentDocument.title;
+          }
+        </script>
+      </body>
+      """
+      supertest(app).get('/').end (err, res) ->
+        expect(res.text).to.contain '<title>true</title>'
+        done()
 
-    context 'when an iframe points to a local page', ->
-      beforeEach ->
-        src = """
-        <head><title>false</title></head>
-        <body>
-          <iframe src="/static"></iframe>
-          <script>
-            var frame = document.getElementsByTagName("iframe")[0];
-            frame.onload = function() {
-              document.title = frame.contentDocument.title;
-            }
-          </script>
-        </body>
-        """
-      it 'loads the page', (done)->
-        supertest(app).get('/').end (err, res) ->
-          expect(res.text).to.contain '<title>true</title>'
-          done()
-
-    context 'when an iframe points to an external page', ->
-      beforeEach ->
-        src = """
-        <body>
-          <iframe src="http://www.example.com/static"></iframe>
-          <script>
-            var frame = document.getElementsByTagName("iframe")[0];
-          </script>
-        </body>
-        """
-      it 'does not load the page', (done) ->
-        supertest(app)
-          .get('/')
-          .expect(500)
-          .end (err, res) -> done(err)
+    it 'does not load the page when an iframe points to an external page', (done) ->
+      src = """
+      <body>
+        <iframe src="http://www.example.com/static"></iframe>
+        <script>
+          var frame = document.getElementsByTagName("iframe")[0];
+        </script>
+      </body>
+      """
+      supertest(app)
+        .get('/')
+        .expect(500)
+        .end (err, res) -> done(err)
 
     it 'generates a redirect when window.location is assigned to an external URL', (done) ->
       src = """
@@ -184,17 +173,16 @@ describe 'renderer.controller', ->
     beforeEach ->
       app = express()
       app.get '/', renderer.controller site: site, allowedHosts: ['code.jquery.com']
-    context 'when a <script> tag points at a script on code.jquery.com', ->
-      beforeEach ->
-        src = """
-        <head><title>false</title></head>
-        <body><script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>'
-        <script>if (window.jQuery) document.title = 'true'</script></body>
-        """
-      it 'does loads the script', (done) ->
-        supertest(app).get('/').end (err, res) ->
-          expect(res.text).to.contain '<title>true</title>'
-          done()
+
+    it 'loads the script when a <script> tag points at a script on code.jquery.com', (done) ->
+      src = """
+      <head><title>false</title></head>
+      <body><script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>'
+      <script>if (window.jQuery) document.title = 'true'</script></body>
+      """
+      supertest(app).get('/').end (err, res) ->
+        expect(res.text).to.contain '<title>true</title>'
+        done()
 
 
 
