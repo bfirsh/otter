@@ -33,7 +33,7 @@ Nope! Unlike other techniques which allow you to run the same code on the server
 
 Otter is far more paranoid than a browser so you don't trip up on common client-side vulnerabilities. 
 
-All code runs inside a sandbox. Node's sandboxes are not perfect, though – you must still make sure you always run trusted code. To help with that, Otter will only allow HTTP requests to made to the local server by default. If you wish to load data from other domains, you must explicitly allow them.
+All code runs inside a sandbox. Node's sandboxes are not perfect, though – you must still make sure you always run trusted code. To help with that, Otter will only allow HTTP requests to the local server by default. If you wish to load data from other domains, you must explicitly allow them.
 
 Install
 -------
