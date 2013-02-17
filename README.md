@@ -45,11 +45,11 @@ Install
 Getting started
 ---------------
 
-Otter is, at a basic level, an HTTP server. Pointed at a directory, it will serve the files inside it. It starts doing clever things, however, when it is asked to serve a file that *doesn't exist*.
+Otter is, at a basic level, an HTTP server. Pointed at a directory, it will serve the files inside it. Only when it is asked to serve a file that *doesn't exist* does it start doing clever things.
 
-When asked to serve a file that doesn't exist in the directory it is pointed at, it will load `index.html` and open that up in Zombie.js. When Zombie.js has finished running the page (all Ajax requests have finished, etc), it will send `document.outerHTML` as the HTTP response.
+When asked to serve a file that doesn't exist, it will load the file `index.html` and open that up in Zombie.js. When Zombie.js has finished running the page (all Ajax requests have finished, etc), it will send `document.outerHTML` as the HTTP response back to the client.
 
-The app inside `example/` is a simple Twitter client written in Backbone. The first page load runs server-side, then the client instantiates Backbone's router to handle subsequent requests. It uses [backbone-otter](https://github.com/bfirsh/backbone-otter) to handle caching between server and client.
+To demonstrate how Otter works, an example app is included in `example/`. It is a simple Twitter client written in Backbone. The first page load runs server-side, then the client instantiates Backbone's router to handle subsequent requests. It uses [backbone-otter](https://github.com/bfirsh/backbone-otter) to handle caching between server and client.
 
 Run Otter on that directory, allowing requests to `api.twitter.com`:
 
@@ -61,9 +61,9 @@ Point your browser at [http://localhost:8000](http://localhost:8000).
 Resuming your app on the client
 -------------------------------
 
-When the server generates your app's HTML and sends it to the client, the client then needs to reload the application so it can handle user interation and route future pages.
+A tricky problem is reinstantiating the app on the client after the app has been run on the server so it can handle user interaction and route future pages. Otter is framework agnostic, so it doesn't prescribe a solution. Though it does provide tools, such as `window.otter.cache` (see *API* below) and [backbone-otter](http://github.com/bfirsh/backbone-otter) if you're using Backbone.
 
-The brute-force approach is to just reroute the URL, completely rebuilding the page client-side. This isn't as scary as it sounds if you cache all the data fetched on page load, but the downsides of this are its obvious ineffciency and perhaps some odd side-effects of loading a new copy of the DOM in if the user has already interacted with the initial DOM.
+The brute-force solution is to just reroute the URL, completely rebuilding the page client-side. This isn't as scary as it sounds if you cache the data that was fetched on the server, but the downsides of this are its obvious inefficiency and perhaps some odd side-effects of loading a new copy of the DOM in if the user has already interacted with the initial DOM.
 
 We can be smarter, though. We can cache the data fetched server-side and pass it to the client. If we then rebuild a set of models and views attached to the correct DOM elements that the server has generated, we can then efficiently "boot up" the application again. In Backbone, this would be a matter of only rendering a view if it hasn't already been populated by the server.
 
