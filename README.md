@@ -53,7 +53,7 @@ The app inside `example/` is a simple Twitter client written in Backbone. The fi
 
 Run Otter on that directory, allowing requests to `api.twitter.com`:
 
-    $ ./bin/otter -a api.twitter.com example/
+    $ otter -a api.twitter.com example/
     Server started on port 8000.
 
 Point your browser at [http://localhost:8000](http://localhost:8000).
