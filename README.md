@@ -27,7 +27,7 @@ Otter's a standalone server that runs client-side JavaScript. The app running in
 
 ### So I have to write my client-side code with Backbone?
 
-Nope! Unlike other techniques which allow you to run the same code on the server and in the browser, Otter is *framework agnostic*. It is an implementation of the browser APIs on the server, so almost any code which runs inside the browser will run inside Otter.
+Nope! Unlike other techniques which allow you to run the same code on the server and in the browser, Otter is framework agnostic. It is an implementation of the browser APIs on the server, so almost any code which runs inside the browser will run inside Otter.
 
 ### Is it secure?
 
@@ -45,7 +45,7 @@ Install
 Getting started
 ---------------
 
-Otter is, at a basic level, an HTTP server. Pointed at a directory, it will serve the files inside it. Only when it is asked to serve a file that *doesn't exist* does it start doing clever things.
+Otter is, at a basic level, an HTTP server. Pointed at a directory, it will serve the files inside it. Only when it is asked to serve a file that doesn't exist does it start doing clever things.
 
 When asked to serve a file that doesn't exist, it will load the file `index.html` and open that up in Zombie.js. When Zombie.js has finished running the page (all Ajax requests have finished, etc), it will send `document.outerHTML` as the HTTP response back to the client.
 
