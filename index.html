@@ -41,16 +41,16 @@
       <section>
         <h1>Otter</h1>
 
-<p>Otter runs your client-side apps server-side.</p>
+<p>A server that runs your client-side apps.</p>
 
 <h2>Wait, what?</h2>
 
-<p>Web apps are shifting client-side. More and more logic is moving from the server to the client, but this often ends up with your server being just a JSON API and a blank index.html which gets filled with content client-side. This sucks for two reasons:</p>
+<p>Web apps are shifting client-side. More and more logic is moving from the server to the client, but this often ends up with your server becoming just a JSON API and a blank index.html which gets filled with content client-side. This sucks for two reasons:</p>
 
 <ul>
 <li>It's slow. You have to make at least two round trips to the server before any content is displayed.</li>
 <li>It's invisible to search engines, curl, browsers with JavaScript disabled, etc.</li>
-</ul><p>The typically solution to this problem is to extend your server so it renders some of what the client-side code would render. This works, but now you're writing everything twice.</p>
+</ul><p>The typically solution to this problem is to write code on your server that renders some of what the client would render. This works, but now you're writing everything twice.</p>
 
 <p>But what if we could use client-side APIs on the server? What if we could generate pages with the DOM instead of templates? And make HTTP requests with XMLHTTPRequest? This would mean we could run client-side code on the server without modification.</p>
 
@@ -62,31 +62,83 @@
 
 <p>Nope! You don't have to modify your server.</p>
 
-<p>Otter's a standalone server. The app running inside Otter talks to the same thing your client-side app does. If you've got a Backbone app, it talks to the same server which serves JSON for your models.</p>
+<p>Otter's a standalone server that runs client-side JavaScript. The app running inside Otter talks to the same thing your browser does. If you've got a Backbone app, it talks to the same server which serves JSON for your models.</p>
 
 <h3>So I have to write my client-side code with Backbone?</h3>
 
-<p>Nope! Unlike other techniques which allow you to run the same code server- and client-side, Otter is <em>framework agnostic</em>. It is an implementation of the browser APIs on the server, so almost any code which runs inside the browser will run inside Otter.</p>
+<p>Nope! Unlike other techniques which allow you to run the same code on the server and in the browser, Otter is framework agnostic. It is an implementation of the browser APIs on the server, so almost any code which runs inside the browser will run inside Otter.</p>
 
 <h3>Is it secure?</h3>
 
-<p>Otter is far more paranoid than a browser so you don't trip up on the usual client-side vulnerabilities. </p>
+<p>Otter is far more paranoid than a browser so you don't trip up on common client-side vulnerabilities. </p>
 
-<p>All code runs inside a sandbox. Node's sandboxes are not perfect, though - you must still make sure you always run trusted code. To help with that, Otter will only allow HTTP requests to made to the local server by default. If you wish to load data from other domains, you must explicitly allow them.</p>
+<p>All code runs inside a sandbox. Node's sandboxes are not perfect, though – you must still make sure you always run trusted code. To help with that, Otter will only allow HTTP requests to the local server by default. If you wish to load data from other domains, you must explicitly allow them.</p>
+
+<h2>Install</h2>
+
+<pre><code>$ sudo npm install -g otter
+</code></pre>
+
+<p>(Or your preferred way of installing npm packages.)</p>
 
 <h2>Getting started</h2>
 
-<p>The app inside <code>example/</code> is a simple example of a Backbone app that uses Otter. The first page load runs server-side, then the client instantiates Backbone's router to handle subsequent requests.</p>
+<p>Otter is, at a basic level, an HTTP server. Pointed at a directory, it will serve the files inside it. Only when it is asked to serve a file that doesn't exist does it start doing clever things.</p>
 
-<pre><code>$ ./bin/otter -a api.twitter.com example/
+<p>When asked to serve a file that doesn't exist, it will load the file <code>index.html</code> and open that up in Zombie.js. When Zombie.js has finished running the page (all Ajax requests have finished, etc), it will send <code>document.outerHTML</code> as the HTTP response back to the client.</p>
+
+<p>To demonstrate how Otter works, an example app is included in <code>example/</code>. It is a simple Twitter client written in Backbone. The first page load runs server-side, then the client instantiates Backbone's router to handle subsequent requests. It uses <a href="https://github.com/bfirsh/backbone-otter">backbone-otter</a> to handle caching between server and client.</p>
+
+<p>Run Otter on that directory, allowing requests to <code>api.twitter.com</code>:</p>
+
+<pre><code>$ otter -a api.twitter.com example/
 Server started on port 8000.
 </code></pre>
 
 <p>Point your browser at <a href="http://localhost:8000">http://localhost:8000</a>.</p>
 
-<h2>Complex example</h2>
+<h2>Usage</h2>
 
-<h2>Using it as part of an Express app</h2>
+<pre><code>$ otter [options] &lt;path&gt;
+</code></pre>
+
+<p>Otter is passed a path to a directory which is expected to contain an <code>index.html</code> file. It takes these options:</p>
+
+<h4>-a <code>host1,host2</code>
+</h4>
+
+<p>A comma-separated list of hosts to allow connections to (e.g. <code>api.example.com,api.twitter.com</code>). By default, Otter will not allow connections to be made to any host except itself. If you want to allow Ajax connections to your API, for example, you will need to add it to this list.</p>
+
+<h4>-p <code>port</code>
+</h4>
+
+<p>The port to listen on. Default: 8000</p>
+
+<h2>API</h2>
+
+<p>Otter provides an API to use inside your apps, exposed as <code>window.otter</code> on both the server and the client.</p>
+
+<h3><code>window.otter.isServer</code></h3>
+
+<p><code>true</code> or <code>false</code>, whether or not the page is running on the server or client.</p>
+
+<h3><code>window.otter.cache</code></h3>
+
+<p>An object that can be used to pass data from the server to the client. You can set values in this object on the server, then when Otter has finished rendering a page, it serialises it to JSON and passes it to the client. It is injected into the top of the page so it is also available as <code>window.otter.cache</code>.</p>
+
+<h2>Resuming your app on the client</h2>
+
+<p>A tricky problem is reinstantiating the app on the client after the app has been run on the server so it can handle user interaction and route future pages. Otter is framework agnostic, so it doesn't prescribe a solution. Though it does provide tools, such as <code>window.otter.cache</code> (see <a href="#api">API</a>) and <a href="http://github.com/bfirsh/backbone-otter">backbone-otter</a> if you're using Backbone.</p>
+
+<p>The brute-force solution is to just reroute the URL, completely rebuilding the page client-side. This isn't as scary as it sounds if you cache the data that was fetched on the server, but the downsides of this are its obvious inefficiency and perhaps some odd side-effects of loading a new copy of the DOM in if the user has already interacted with the initial DOM.</p>
+
+<p>We can be smarter, though. We can cache the data fetched server-side and pass it to the client. If we then rebuild a set of models and views attached to the correct DOM elements that the server has generated, we can then efficiently "boot up" the application again. In Backbone, this would be a matter of only rendering a view if it hasn't already been rendered by the server. See the included example app for a simple example of how this can be done.</p>
+
+<p>I am working on some <a href="https://github.com/bfirsh/backbone-otter">Backbone tools for Otter</a> to make this process easier.</p>
+
+<h2>Extending Otter</h2>
+
+<p>Instead of running Otter standalone, it can also be extended by using it as part of a Node.js app. See <code>lib/otter/server.coffee</code> for the Express app that is used internally. The renderer is available as <code>require('otter').renderer</code>.</p>
 
 <h2>Running the test suite</h2>
 
@@ -99,6 +151,16 @@ Server started on port 8000.
       </footer>
     </div>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-6774621-4");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
   </body>
 </html>
