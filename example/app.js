@@ -42,19 +42,23 @@ var Router = Backbone.Router.extend({
         'users/:id': 'user'
     },
 
+    initialize: function() {
+        this.on('route', function() {
+            this.hasRouted = true;
+        });
+    },
+
     index: function() {
         var view = new IndexView({el: $('.content')});
-        // Render this view if server has filled content.
-        if (this.previousView || !view.hasRendered()) view.render();
-        this.previousView = view;
+        // Render this view if we are not on first route or server has not filled content.
+        if (this.hasRouted || !view.hasRendered()) view.render();
     },
 
     user: function(id) {
         var user = new User({id: id});
         user.fetch();
         var view = new UserView({el: $('.content'), model: user});
-        if (this.previousView || !view.hasRendered()) view.render();
-        this.previousView = view;
+        if (this.hasRouted || !view.hasRendered()) view.render();
     }
 });
 
