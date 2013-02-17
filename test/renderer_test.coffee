@@ -6,7 +6,7 @@ helpers = require './helpers'
 
 describe 'renderer.controller', ->
   src = app = zombieServer = null
-  baseUrl = 'http://127.0.0.1:35920'
+  site = 'http://127.0.0.1:35920'
 
   # Set up server that zombie can talk to
   before (done) ->
@@ -37,7 +37,7 @@ describe 'renderer.controller', ->
     beforeEach ->
       # Set up app for testing controller
       app = express()
-      app.get '/', renderer.controller baseUrl: baseUrl
+      app.get '/', renderer.controller site: site
 
     context 'when the server is serving a basic HTML page', ->
       beforeEach ->
@@ -150,26 +150,37 @@ describe 'renderer.controller', ->
           expect(res.text).to.contain '<title>false</title>'
           done()
 
-    context 'when window.location is assigned to an external URL', ->
-      beforeEach ->
-        src = """
-        <head><title>false</title></head>
-        <body>
-          <script>
-            window.location = "http://www.example.com/static"
-          </script>
-        </body>
-        """
-      it 'throws an error', (done) ->
-        supertest(app).get('/').end (err, res) ->
-          expect(res.text).to.not.contain '<title>true</title>'
-          done()
+    it 'generates a redirect when window.location is assigned to an external URL', (done) ->
+      src = """
+      <body>
+        <script>
+          window.location = "http://www.google.com"
+        </script>
+      </body>
+      """
+      supertest(app).get('/').end (err, res) ->
+        expect(res.statusCode).to.equal 302
+        expect(res.headers['location']).to.equal 'http://www.google.com'
+        done()
+
+    it 'generates a redirect when window.location is assigned to an external URL', (done) ->
+      src = """
+      <body>
+        <script>
+          window.location = "/internal"
+        </script>
+      </body>
+      """
+      supertest(app).get('/').end (err, res) ->
+        expect(res.statusCode).to.equal 302
+        expect(res.headers['location']).to.equal '/internal'
+        done()
 
 
   context 'when renderer.controller has "code.jquery.com" in allowedHosts', ->
     beforeEach ->
       app = express()
-      app.get '/', renderer.controller baseUrl: baseUrl, allowedHosts: ['code.jquery.com']
+      app.get '/', renderer.controller site: site, allowedHosts: ['code.jquery.com']
     context 'when a <script> tag points at a script on code.jquery.com', ->
       beforeEach ->
         src = """

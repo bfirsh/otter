@@ -28,7 +28,7 @@ exports.createApp = (options) ->
   return app
 
 exports.start = (options) ->
-  options.baseUrl = 'http://127.0.0.1:' + options.port
+  options.site = 'http://127.0.0.1:' + options.port
   app = exports.createApp options
   app.listen options.port
   return app

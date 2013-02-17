@@ -4,8 +4,12 @@ exports.controller = (options) ->
   (req, res, next) ->
     browser = new OtterBrowser
       allowedHosts: options.allowedHosts
-      baseUrl: options.baseUrl
-    browser.visit options.baseUrl + req.url, (err, browser) ->
+      site: options.site
+    browser.on "navigate", (url) ->
+      console.log url
+      res.redirect(url)
+      browser.destroy()
+    browser.visit req.url, (err, browser) ->
       browser.injectWindowOtter()
       res.send browser.document.outerHTML
       browser.destroy()
