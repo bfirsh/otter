@@ -19,7 +19,7 @@ Otter does just that. When a client makes a request to Otter, it loads up your a
 
 If the client supports JavaScript, they can start up the client-side router, and it's business as usual. If the client can't run JavaScript, they just see the content as a normal web page.
 
-You've now got an application which behaves like it was written in a server-side language, but actually shares its the code with the client.
+You've now got an application which behaves like it was written in a server-side language, but actually shares its code with the client.
 
 
 ### So I'll have to write my server in JavaScript?
