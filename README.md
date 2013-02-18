@@ -6,18 +6,21 @@ A server that runs your client-side apps.
 Wait, what?
 -----------
 
-Web apps are shifting client-side. More and more logic is moving from server to client, but that often ends up with your server just serving up  a JSON API and a blank index.html which gets filled with content client-side. This sucks for two reasons:
+Web apps are shifting client-side. More and more logic is moving from server to client, but that often ends up with your server just serving up a JSON API and a blank index.html which gets filled with content client-side. This sucks for two reasons:
 
  - It's slow. You must make at least two round trips to the server before any content is displayed.
  - Your content is invisible to search engines, curl, browsers with JavaScript disabled, etc.
 
 A typical solution to this problem is to write server-side code that renders some of what the client would render. This works, but now you're writing everything twice.
 
-But what if we could use client-side APIs on the server? What if we could generate HTML with the DOM and jQuery? Make HTTP requests with XMLHTTPRequest? This would mean we could run client-side code on the server without modification.
+But what if we could use client-side APIs on the server? What if we could generate HTML with the DOM and jQuery? Make HTTP requests with XMLHTTPRequest? This would mean you could run your client-side code on the server without modification.
 
-Otter does just that. When a client makes a request to Otter, it loads up your app inside Zombie.js, a Node implementation of the browser APIs. After it has  finished loading a page, it renders the DOM to a string and sends it back to the client.
+Otter does just that. When a client makes a request to Otter, it loads up your app inside Zombie.js, a Node implementation of the browser APIs. After it has finished loading a page, it renders the DOM to a string and sends it back to the client.
 
 If the client supports JavaScript, they can start up the client-side router, and it's business as usual. If the client can't run JavaScript, they just see the content as a normal web page.
+
+You've now got an application which behaves like it was written in a server-side language, but actually shares its the code with the client.
+
 
 ### So I'll have to write my server in JavaScript?
 
@@ -33,7 +36,7 @@ Nope! Unlike other techniques that allow running the same code on the server and
 
 Otter is far more paranoid than a browser, so you won't trip up on common client-side vulnerabilities. 
 
-All code runs inside a sandbox. Node's sandboxes aren't perfect – you must still ensure that you always run trusted code – but to help with that, Otter only allows HTTP requests to the local server by default. If you wish to load data from other domains, you must allow them explicitly.
+All code runs inside a sandbox. Node's sandboxes aren't perfect though – you must still ensure that you always run trusted code – but to help with that, Otter only allows HTTP requests to the local server by default. If you wish to load data from other domains, you must allow them explicitly.
 
 Install
 -------
@@ -47,7 +50,7 @@ Getting started
 
 Otter is, at a basic level, an HTTP server. Pointed at a directory, it will serve the files inside it. It only starts doing clever things when it is asked to serve a file that doesn't exist.
 
-Instead of showing a 404, it will open the file `index.html` in Zombie.js. When Zombie.js finishes running the page (all Ajax requests have finished, etc) it sends `document.outerHTML` as the HTTP response back to the client.
+Instead of showing a 404, it will open the file `index.html` in Zombie.js. When Zombie.js finishes loading the page (all Ajax requests have finished, etc) it sends `document.outerHTML` as the HTTP response back to the browser.
 
 To demonstrate how Otter works, an example app is included in `example/`. It's a simple Twitter client written in Backbone. The first page load runs server-side, then the client instantiates Backbone's router to handle subsequent requests. It uses [backbone-otter](https://github.com/bfirsh/backbone-otter) to handle caching between server and client.
 
@@ -84,7 +87,9 @@ Otter provides an API to use inside your apps, exposed as `window.otter` on both
 
 ### `window.otter.cache`
 
-An object that can be used to pass data from the server to the client. When your app is running inside Otter, it can set keys on this object. When Otter has finished loading the page, it serialises the object to JSON and injects it into the top of the page sent to the browser. When the browser opens the page, the value of `window.otter.cache` is restored from the serialised JSON.
+An object that can be used to pass data from the server to the client.
+
+When your app is running inside Otter, it can set keys on this object. The object is serialised to JSON and injected into the top of the page sent to the browser. When the browser opens the page, the value of `window.otter.cache` is restored from the serialised JSON.
 
 See the section *Resuming your app on the client* for an example of how this object can be used.
 
@@ -111,9 +116,9 @@ else {
 
 Reinstantiating the app on the client after the app has been run on the server, in order that it can handle user interaction and route future pages, is a tricky problem. Otter is framework agnostic, so it doesn't prescribe a solution. It does, however, provide tools, such as `window.otter.cache` (see [API](#api)) and [backbone-otter](http://github.com/bfirsh/backbone-otter) if you're using Backbone.
 
-There are two solutions to the this problem. The brute-force solution is to reroute the URL, completely rebuilding the page client-side. This isn't as scary as it sounds if you cache the data that was fetched on the server, but the downsides of this are obvious inefficiency, and possibly odd side-effects of loading in a new copy of the DOM, if the user has already interacted with the initial DOM.
+The brute-force approach is to reroute the URL, completely rebuilding the page client-side. This isn't as scary as it sounds if you cache the data that was fetched on the server, but the downsides of this are obvious inefficiency, and possibly odd side-effects of loading in a new copy of the DOM, if the user has already interacted with the initial DOM.
 
-We can work smarter, though. We can cache data that Otter fetches from your API, and pass it on to the client. If we then rebuild a set of models and views attached to the correct DOM elements that the server has generated, we can efficiently "boot up" the application again. In Backbone, this is a matter of only rendering a view if it hasn't already been rendered by the server. See the included example app for a simple demonstration of how this can be done.
+If you want a more efficient solution, we can work smarter. We can cache data that Otter fetches from your API, and pass it on to the client. If we then rebuild a set of models and views attached to the correct DOM elements that the server has generated, we can "boot up" the application again without having to regenerate the HTML. In Backbone, this is a matter of only rendering a view if it hasn't already been rendered by the server. See the included example app for a simple demonstration of how this can be done.
 
 I am working on some [Backbone tools for Otter](https://github.com/bfirsh/backbone-otter) to make this process easier.
 
