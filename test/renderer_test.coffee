@@ -169,6 +169,36 @@ describe 'renderer.controller', ->
         .expect(500)
         .end (err, res) -> done(err)
 
+    it 'passes on any cookies in the request to zombie', (done) ->
+      src = """
+      <head><title></title></head>
+      <body>
+        <script>
+          document.title = document.cookie;
+        </script>
+      </body>
+      """
+      supertest(app)
+        .get('/')
+        .set('cookie', 'foo=bar')
+        .end (err, res) ->
+          expect(res.text).to.contain '<title>foo=bar</title>'
+          done()
+
+    it 'passes on any cookies in the request to zombie', (done) ->
+      src = """
+      <body>
+        <script>
+          document.cookie = "foo=bar"
+        </script>
+      </body>
+      """
+      supertest(app)
+        .get('/')
+        .end (err, res) ->
+          expect(res.headers['set-cookie']).to.match /^foo=bar/
+          done()
+
   context 'when renderer.controller has "code.jquery.com" in allowedHosts', ->
     beforeEach ->
       app = express()
