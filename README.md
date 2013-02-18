@@ -87,8 +87,26 @@ Otter provides an API to use inside your apps, exposed as `window.otter` on both
 An object that can be used to pass data from the server to the client. You can set values in this object on the server, then when Otter has finished rendering a page, it serialises it to JSON and passes it to the client. It is injected into the top of the page so it is also available as `window.otter.cache`.
 
 
-Resuming your app on the client
--------------------------------
+Writing an app for Otter
+------------------------
+
+Writing an app for Otter is almost the same as writing a single-page app just for the browser, but there are a few things you need to take into account.
+
+### Running code only on the server or the client
+
+Some code only makes sense to run on the client. For example, handling user interaction, drawing to canvases etc. You can use the `window.otter.isServer` variable to check if you are running on the server:
+
+```javascript
+if (window.otter && window.otter.isServer) {
+    // Running on the server
+}
+else {
+    // Running in the browser
+}
+
+```
+
+### Resuming your app on the client
 
 A tricky problem is reinstantiating the app on the client after the app has been run on the server so it can handle user interaction and route future pages. Otter is framework agnostic, so it doesn't prescribe a solution. Though it does provide tools, such as `window.otter.cache` (see [API](#api)) and [backbone-otter](http://github.com/bfirsh/backbone-otter) if you're using Backbone.
 
@@ -97,6 +115,15 @@ The brute-force solution is to just reroute the URL, completely rebuilding the p
 We can be smarter, though. We can cache the data fetched server-side and pass it to the client. If we then rebuild a set of models and views attached to the correct DOM elements that the server has generated, we can then efficiently "boot up" the application again. In Backbone, this would be a matter of only rendering a view if it hasn't already been rendered by the server. See the included example app for a simple example of how this can be done.
 
 I am working on some [Backbone tools for Otter](https://github.com/bfirsh/backbone-otter) to make this process easier.
+
+### Redirects
+
+Whenever the app running inside Otter causes a change in location (e.g. setting `window.location`), Otter will intercept this and immediately respond with a 302 redirect to that location.
+
+### Cookies
+
+Cookies in an HTTP request to Otter will be passed through to `document.cookie` so they are available inside Otter. Similarly, any cookies set in `document.cookie` will be sent back with the HTTP response to the browser.
+
 
 Extending Otter
 ---------------
