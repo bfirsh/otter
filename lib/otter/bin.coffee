@@ -1,5 +1,6 @@
 server = require './server'
 docopt = require 'docopt'
+packagejson = require '../../package.json'
 
 doc = """
 Otter is an HTTP server that renders your client-side apps with Zombie.js.
@@ -19,7 +20,7 @@ Options:
 """
 
 exports.run = ->
-  options = docopt.docopt(doc, version: '0.1.0')
+  options = docopt.docopt(doc, version: packagejson.version)
   server.start 
     port: options['-p']
     path: options['<path>']
