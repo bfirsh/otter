@@ -39,7 +39,10 @@ exports.createApp = (options) ->
 exports.start = (options) ->
   numberOfWorkers = options.workers ? os.cpus().length
   if cluster.isMaster
+    cluster.setupMaster
+      exec: path.join(__dirname, '../../bin/otter')
     cluster.on 'exit', (worker, code, signal) ->
+      return if worker.suicide
       console.log "worker #{worker.process.pid} died (#{worker.process.exitCode}). restarting..."
       cluster.fork()
     for i in [0 ... numberOfWorkers]
