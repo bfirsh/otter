@@ -76,6 +76,10 @@ A comma-separated list of hosts to allow connections to (e.g. `api.example.com,a
 
 The port to listen on. Default: 8000
 
+#### -w `num`
+
+The number of worker processes to spawn, defaulting to the number of CPUs.
+
 API
 ---
 

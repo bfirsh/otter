@@ -1,9 +1,12 @@
+cluster = require 'cluster'
 express = require 'express'
 fs = require 'fs'
+os = require 'os'
 path = require 'path'
 renderer = require './renderer'
 
 exports.createApp = (options) ->
+  options.site = 'http://127.0.0.1:' + options.port
   app = express()
   if options.logging
     app.use express.logger()
@@ -34,9 +37,15 @@ exports.createApp = (options) ->
   return app
 
 exports.start = (options) ->
-  options.site = 'http://127.0.0.1:' + options.port
-  app = exports.createApp options
-  app.listen options.port
-  return app
+  numberOfWorkers = options.workers ? os.cpus().length
+  if cluster.isMaster
+    cluster.on 'exit', (worker, code, signal) ->
+      console.log "worker #{worker.process.pid} died (#{worker.process.exitCode}). restarting..."
+      cluster.fork()
+    for i in [0 ... numberOfWorkers]
+      cluster.fork()
+  else
+    exports.createApp(options).listen(options.port)
+  return cluster
 
 
