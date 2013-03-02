@@ -137,7 +137,7 @@ Cookies in an HTTP request to Otter will be passed through to `document.cookie` 
 Deployment
 ----------
 
-Otter can be deployed to Heroku. You'll first want to create a `package.json` file that specifies Otter as a dependency:
+Otter apps can be deployed to Heroku. Within your app, you'll want to create a `package.json` file that specifies Otter as a dependency:
 
 ```json
     {
