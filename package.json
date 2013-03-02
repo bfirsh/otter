@@ -1,6 +1,6 @@
 {
   "name": "otter",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "run your client-side apps on the server",
   "homepage": "https://github.com/bfirsh/otter",
   "author": "Ben Firshman <ben@firshman.co.uk>",
