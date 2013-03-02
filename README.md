@@ -149,7 +149,7 @@ Otter apps can be deployed to Heroku. Within your app, you'll want to create a `
     }
 ```
 
-You'll also need a `Procfile` to tell Heroku how to run Otter, assuming your app is in a directory called `app/`:
+You'll also need a `Procfile` to tell Heroku how to run Otter, assuming `index.html` and the rest of your app is in a directory called `app/`:
 
 ```
     web: ./node_modules/.bin/otter -p $PORT app/
