@@ -6,6 +6,7 @@ exports.controller = (options) ->
   (req, res, next) ->
     browser = new OtterBrowser
       allowedHosts: options.allowedHosts
+      path: options.path
       site: options.site
     # Handle redirects
     browser.on "navigate", (url) ->

@@ -1,19 +1,15 @@
 Browser = require 'zombie'
+FS = require 'fs'
 Q = require 'q'
+Path = require 'path'
 URL = require 'url'
 
 module.exports = class OtterBrowser extends Browser
   constructor: (options = {}) ->
-    # Attach a magic header to all requests from otter
-    options.headers ?= {}
-    options.headers["X-Otter-No-Render"] ?= "true"
-
     super
 
     @allowedHosts = options.allowedHosts ? []
-    # Always allow local requests 
-    if @site
-      @allowedHosts.push(URL.parse(@site).host)
+    @path = options.path
 
     @on 'opened', (window) =>
       # We're opening an iframe, ignore
@@ -46,16 +42,32 @@ module.exports = class OtterBrowser extends Browser
         isServer: true
         cache: {}
 
+    # Zombie doesn't play well with bound functions
+    _this = @
+    @resources.addHandler (request, next) -> _this._handleRequest(request, next)
 
-    # Only open resources if they are in @allowedHosts
-    @resources.addHandler (request, next) =>
-      parsedUrl = URL.parse(request.url)
-      if parsedUrl.host not in @allowedHosts
-        err = new Error("Not loading #{parsedUrl.href}: #{parsedUrl.host} not in allowedHosts")
-        @emit "error", err
-        next(err)
-      else
-        next()
+  # Intercept all requests Zombie does and do our own processing.
+  _handleRequest: (request, next) =>
+    parsedUrl = URL.parse(request.url)
+    siteHost = URL.parse(@site).host
+    # Local request, load straight off the filesystem
+    if @path and parsedUrl.host == siteHost
+      fullPath = Path.join(@path, parsedUrl.pathname)
+      FS.stat fullPath, (err, stats) =>
+        if not stats?.isFile()
+          fullPath = Path.join(@path, 'index.html')
+        FS.readFile fullPath, (err, body) =>
+          if err
+            next(err)
+          else
+            next(null, body: body)
+    # Only open remote resources if they are in @allowedHosts
+    else if parsedUrl.host not in @allowedHosts and parsedUrl.host != siteHost
+      err = new Error("Not loading #{parsedUrl.href}: #{parsedUrl.host} not in allowedHosts")
+      @emit "error", err
+      next(err)
+    else
+      next()
 
   # Loads a document from the specified URL. This is the entry point to using an Otter 
   # browser - other methods are currently unsupported.
