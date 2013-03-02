@@ -134,6 +134,33 @@ Otter will intercept changes in location (e.g. setting `window.location`) and im
 
 Cookies in an HTTP request to Otter will be passed through to `document.cookie` so that they are available inside Otter. Similarly, any cookies set in `document.cookie` will be sent back with the HTTP response to the browser.
 
+Deployment
+----------
+
+Otter is pretty easy to deploy on Heroku.
+
+You'll first want to create a `package.json` file that specifies Otter as a dependency:
+
+```json
+    {
+      "name": "otter-example",
+      "version": "0.1.0",
+      "dependencies" : {
+        "otter": "*"
+      }
+    }
+```
+
+You'll also need a `Procfile` to tell Heroku how to run Otter, assuming your app is in a directory called `app/`:
+
+```
+    web: ./node_modules/.bin/otter -p $PORT app/
+```
+
+Then [deploy to Heroku as usual](https://devcenter.heroku.com/articles/nodejs).
+
+Take a look at [Hao-kang Den's kawauso](https://github.com/hden/kawauso) for a more complete example.
+
 
 Extending Otter
 ---------------
