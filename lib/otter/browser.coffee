@@ -6,9 +6,16 @@ URL = require 'url'
 
 module.exports = class OtterBrowser extends Browser
   constructor: (options = {}) ->
+    # Attach a magic header to all requests from otter
+    options.headers ?= {}
+    options.headers["X-Otter"] ?= "true"
+
     super
 
     @allowedHosts = options.allowedHosts ? []
+    # Always allow local requests
+    if @site
+      @allowedHosts.push(URL.parse(@site).host)
     @path = options.path
 
     @on 'opened', (window) =>
