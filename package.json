@@ -20,7 +20,8 @@
     "docopt": "~0.4",
     "express": "~3.0",
     "q": "0.8.12",
-    "zombie": "http://bfirsh.s3.amazonaws.com/zombie-2.0.0-alpha11-8e1fa4a444.tgz"
+    "tough-cookie": "~0.9.15",
+    "zombie": "2.0.0-alpha18"
   },
   "devDependencies": {
     "mocha": "~1.7",

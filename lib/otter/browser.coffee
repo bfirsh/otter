@@ -2,6 +2,7 @@ Browser = require 'zombie'
 FS = require 'fs'
 Q = require 'q'
 Path = require 'path'
+Cookie = require("tough-cookie").Cookie
 URL = require 'url'
 
 module.exports = class OtterBrowser extends Browser
@@ -23,10 +24,11 @@ module.exports = class OtterBrowser extends Browser
       return if window.parent != window.top
 
       # Otter browsers can only open a single window.
-      if window.name != "otter"
-        @emit 'error', new Error("Attempt to open a new window, but Otter cannot open multiple windows. href: #{window.location.href}")
-        process.nextTick -> window.close()
-        return
+      # TODO: fix this for new version of zombie
+      #if window.name != "otter"
+      #  @emit 'error', new Error("Attempt to open a new window, but Otter cannot open multiple windows. href: #{window.location.href}")
+      #  process.nextTick -> window.close()
+      #  return
 
       # If we've already loaded a page, we're navigating to another page. Otter doesn't 
       # let you do this, so trigger a "navigate" event and close down the browser.
@@ -76,34 +78,6 @@ module.exports = class OtterBrowser extends Browser
     else
       next()
 
-  # Loads a document from the specified URL. This is the entry point to using an Otter 
-  # browser - other methods are currently unsupported.
-  #
-  # This is a copied and pasted version of visit from Zombie, merely setting the tab 
-  # name to "otter". TODO: submit patch to Zombie to allow setting this.
-  visit: (url, options, callback)->
-    if typeof options == "function" && !callback
-      [callback, options] = [options, null]
-
-    deferred = Q.defer()
-    resetOptions = @withOptions(options)
-    if site = @site
-      site = "http://#{site}" unless /^(https?:|file:)/i.test(site)
-      url = URL.resolve(site, URL.parse(URL.format(url)))
-
-    if @window
-      @tabs.close(@window)
-    @tabs.open(url: url, referer: @referer, name: "otter")
-    @wait options, (error)=>
-      resetOptions()
-      if error
-        deferred.reject(error)
-      else
-        deferred.resolve()
-      if callback
-        callback error, this, @statusCode, @errors
-    return deferred.promise unless callback
-
   # Inject a script into the <head> of the current window that will load the current 
   # value of window.otter when it is reopened in the client.
   injectWindowOtter: =>
@@ -126,5 +100,48 @@ module.exports = class OtterBrowser extends Browser
     @window.document.head.insertBefore(jsonEl, @window.document.head.firstChild)
     @window.document.head.insertBefore(scriptEl, jsonEl.nextSibling)
 
+  # A way of setting cookies that remembers which were originally set.
+  # Does not work with paths yet.
+  setCookiesFromHeader: (header, domain) =>
+    if not domain
+      domain = URL.parse(@site).hostname
+    @cookies.update header, domain
+    @_prevCookies = (cookie for cookie in @cookies)
+
+  # If cookies were set with @setCookiesFromHeader, returns a list of
+  # Set-Cookie headers to set the cookies which have changed since
+  getChangedCookieHeaders: (domain) =>
+    if not @_prevCookies
+      @_prevCookies = []
+
+    if not domain
+      domain = URL.parse(@site).hostname
+
+    headers = []
+    
+    # Generate mapping of key to cookie string
+    prevCookieStrings = {}
+    for cookie in @_prevCookies
+      if cookie.domain == domain
+        prevCookieStrings[cookie.key] = cookie.toString()
+
+    newCookieStrings = []
+    for cookie in @cookies.select(domain: domain)
+      newCookieStrings[cookie.key] = cookie.toString()
+
+    # Add cookies which have been set or changed
+    for key, cookie of newCookieStrings
+      if prevCookieStrings[key] != cookie
+        headers.push cookie
+
+    # Delete cookies which have been removed
+    for key, cookie of prevCookieStrings
+      if not newCookieStrings[key]
+        cookie = Cookie.parse(cookie)
+        cookie.value = "deleted"
+        cookie.expires = "Thu, 01 Jan 1970 00:00:00 GMT"
+        headers.push cookie.toString()
+
+    return headers
 
 

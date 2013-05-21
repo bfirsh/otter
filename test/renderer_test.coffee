@@ -105,7 +105,7 @@ describe 'renderer.controller', ->
         expect(res.text).to.contain '<title>false</title>'
         done()
 
-    it 'loads the page when an iframe points to a local page', (done) ->
+    it.skip 'loads the page when an iframe points to a local page', (done) ->
       src = """
       <head><title>false</title></head>
       <body>
@@ -122,7 +122,7 @@ describe 'renderer.controller', ->
         expect(res.text).to.contain '<title>true</title>'
         done()
 
-    it 'does not load the page when an iframe points to an external page', (done) ->
+    it.skip 'does not load the page when an iframe points to an external page', (done) ->
       src = """
       <body>
         <iframe src="http://www.example.com/static"></iframe>
@@ -146,7 +146,7 @@ describe 'renderer.controller', ->
       """
       supertest(app).get('/').end (err, res) ->
         expect(res.statusCode).to.equal 302
-        expect(res.headers['location']).to.equal 'http://www.google.com'
+        expect(res.headers['location']).to.equal 'http://www.google.com/'
         done()
 
     it 'generates a redirect when window.location is assigned to an external URL', (done) ->
